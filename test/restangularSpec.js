@@ -174,6 +174,22 @@ describe("Restangular", function() {
 
       $httpBackend.flush();
     });
+
+    it("getList() should correctly handle params after customDELETE", function() {
+      $httpBackend.expectGET('/accounts?foo=1').respond(accountsModel);
+      restangularAccounts.getList({foo: 1}).then(function(){
+        $httpBackend.expectDELETE('/accounts?ids=1&ids=2&ids=3').respond(201, '');
+        var ids = [1,2,3];
+        return restangularAccounts.customDELETE('', {ids: ids});
+      }).then(function() {
+          $httpBackend.expectGET('/accounts?foo=1').respond(accountsModel);
+          return restangularAccounts.getList({foo: 1});
+        }).then(function(accounts) {
+          expect(sanitizeRestangularAll(accounts)).toEqual(sanitizeRestangularAll(accountsModel));
+        });
+
+      $httpBackend.flush();
+    })
   });
 
   describe("ONE", function() {

@@ -130,22 +130,19 @@ describe("Restangular", function() {
    });
 
     it("Doing a post and then other operation (delete) should call right URLs", function() {
-      restangularAccounts.getList().then(function(accounts) {
-        accounts[1].post('transactions', {id: 1, name: "Gonto"}).then(function(transaction) {
-          transaction.remove();
-          $httpBackend.expectDELETE('/accounts/1/transactions/1').respond(201, '');
-        });
-      });
-
+      restangularAccounts.post(newAccount).then(function(added) {
+        added.remove();
+        $httpBackend.expectDELETE('/accounts/44').respond(201, '');   
+      });      
+      
       $httpBackend.flush();
     });
 
-    it("Doing a post to a server that returns no element will return the parameter of that post", function() {
+    it("Doing a post to a server that returns no element will return undefined", function() {
       restangularAccounts.getList().then(function(accounts) {
         var newTransaction = {id: 1, name: "Gonto"};
         accounts[1].post('transactions', newTransaction).then(function(transaction) {
-          expect(sanitizeRestangularOne(transaction))
-            .toEqual(sanitizeRestangularOne(newTransaction));
+          expect(transaction).toBeUndefined();
         });
       });
 
@@ -175,12 +172,11 @@ describe("Restangular", function() {
       $httpBackend.flush();
     });
 
-    it("getList() should correctly handle params after customDELETE", function() {
+     it("getList() should correctly handle params after customDELETE", function() {
       $httpBackend.expectGET('/accounts?foo=1').respond(accountsModel);
       restangularAccounts.getList({foo: 1}).then(function(){
-        $httpBackend.expectDELETE('/accounts?ids=1&ids=2&ids=3').respond(201, '');
-        var ids = [1,2,3];
-        return restangularAccounts.customDELETE('', {ids: ids});
+        $httpBackend.expectDELETE('/accounts?id=1').respond(201, '');
+        return restangularAccounts.customDELETE('', {id: 1});
       }).then(function() {
           $httpBackend.expectGET('/accounts?foo=1').respond(accountsModel);
           return restangularAccounts.getList({foo: 1});
@@ -189,7 +185,7 @@ describe("Restangular", function() {
         });
 
       $httpBackend.flush();
-    })
+    });
   });
 
   describe("ONE", function() {

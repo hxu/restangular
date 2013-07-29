@@ -1,7 +1,9 @@
 #Restangular
 
 [![Build Status](https://travis-ci.org/mgonto/restangular.png)](https://travis-ci.org/mgonto/restangular)
-
+<a href="https://twitter.com/intent/tweet?hashtags=&original_referer=http%3A%2F%2Fgithub.com%2F&text=Check+out+Restangular%2C+a+service+for+%23AngularJS+that+makes+it+easy+to+use+Res+APIs&tw_p=tweetbutton&url=https%3A%2F%2Fgithub.com%2Fmgonto%2Frestangular" target="_blank">
+  <img src="http://jpillora.com/github-twitter-button/img/tweet.png"></img>
+</a>
 
 Restangular is an AngularJS service that will help you get, delete and update Restfull Resources with very few lines in the Client side. 
 This service is a perfect fit for any WebApp that uses Restfull Resources as the API for your application.
@@ -321,7 +323,11 @@ You can now Override HTTP Methods. You can set here the array of methods to over
 
 #### defaultRequestParams
 
-You can set default Query parameters to be sent with every request
+You can set default Query parameters to be sent with every request and every method.
+
+Additionally, if you want to configure request params per method, you can use `requestParams` configuration similar to `$http`. For example `RestangularProvider.requestParams.get = {single: true}`.
+
+Supported method to configure are: remove, get, post, put, common (all)
 
 #### fullResponse
 
@@ -334,6 +340,10 @@ You can set default Headers to be sent with every request.
 #### requestSuffix
 
 If all of your requests require to send some suffix to work, you can set it here. For example, if you need to send the format like `/users/123.json`you can add that `.json` to the suffix using the `setRequestSuffix`method
+
+#### useCannonicalId
+
+You can set this to either `true` or `false`. By default it's false. If set to true, then the cannonical ID from the element will be used for URL creation (in DELETE, PUT, POST, etc.). What this means is that if you change the ID of the element and then you do a put, if you set this to true, it'll use the "old" ID which was received from the server. If set to false, it'll use the new ID assigned to the element.
 
 ### How to configure them globally
 
@@ -565,15 +575,20 @@ RestangularProvider.addElementTransformer('users', true, function(user) {
 // Then, later in your code you can do the following:
 
 //GET to /buildings/123/evaluate?myParam=param with headers myHeader: value
-//Signature for this "custom created" methods is (params, headers, elem)
+
+//Signature for this "custom created" methods is (params, headers, elem) if it's a safe operation (GET, OPTIONS, etc.)
+// If it's an unsafe operation (POST, PUT, etc.), signature is (elem, params, headers).
+
 // If something is set to any of this variables, the default set in the method creation will be overrided
 // If nothing is set, then the defaults are sent
 Restangular.one('building', 123).evaluate({myParam: 'param'});
 
 //GET to /buildings/123/evaluate?myParam=param with headers myHeader: specialHeaderCase
+
 Restangular.one('building', 123).evaluate({myParam: 'param'}, {'myHeader': 'specialHeaderCase'});
 
-Restangular.all('users').login();
+// Here the body of the POST is going to be {key: value} as POST is an unsafe operation
+Restangular.all('users').login({key: value});
 
 ````
 
